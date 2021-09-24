@@ -1,0 +1,30 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+
+type Character {
+  id: ID!
+  name: String!
+}
+
+type SearchResult {
+  characters: [Character]!
+  count: Int!
+}
+
+input CharacterInput {
+  name: String!
+  id: String
+}
+
+type Mutation {
+  upsertCharacter(input: CharacterInput!): Character!
+}
+
+type Query {
+  character(id:ID!): Character
+  pogues: [Character]!
+  kooks: [Character]!
+  search(text: String!): [SearchResult]!
+}
