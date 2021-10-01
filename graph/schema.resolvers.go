@@ -54,12 +54,17 @@ func (r *queryResolver) Character(ctx context.Context, id string) (*model.Charac
 	return &character, nil
 }
 
-func (r *queryResolver) Pogues(ctx context.Context) ([]*model.Character, error) {
-	panic(fmt.Errorf("not implemented"))
-}
+func (r *queryResolver) Characters(ctx context.Context, cliqueType model.CliqueType) ([]*model.Character, error) {
+	characters := make([]*model.Character, 0)
+	for idx := range r.Resolver.CharacterStore {
+		character := r.Resolver.CharacterStore[idx]
+		if character.CliqueType == cliqueType {
 
-func (r *queryResolver) Kooks(ctx context.Context) ([]*model.Character, error) {
-	panic(fmt.Errorf("not implemented"))
+			characters = append(characters, &character)
+		}
+	}
+
+	return characters, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
