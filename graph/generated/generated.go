@@ -44,8 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Character struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
+		CliqueType func(childComplexity int) int
+		ID         func(childComplexity int) int
+		IsHero     func(childComplexity int) int
+		Name       func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -83,12 +85,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Character.cliqueType":
+		if e.complexity.Character.CliqueType == nil {
+			break
+		}
+
+		return e.complexity.Character.CliqueType(childComplexity), true
+
 	case "Character.id":
 		if e.complexity.Character.ID == nil {
 			break
 		}
 
 		return e.complexity.Character.ID(childComplexity), true
+
+	case "Character.isHero":
+		if e.complexity.Character.IsHero == nil {
+			break
+		}
+
+		return e.complexity.Character.IsHero(childComplexity), true
 
 	case "Character.name":
 		if e.complexity.Character.Name == nil {
@@ -203,15 +219,25 @@ var sources = []*ast.Source{
 #
 # https://gqlgen.com/getting-started/
 
+enum CliqueType {
+  "People who are elite with parents having money"
+  KOOKS
+  "People who desperate to move up the social ladder to become new versions of themselves and establish new beginnings"
+  POGUES
+}
 
 type Character {
   id: ID!
   name: String!
+  isHero: Boolean!
+  cliqueType: CliqueType!
 }
 
 input CharacterInput {
   name: String!
   id: String
+  isHero: Boolean
+  cliqueType: CliqueType!
 }
 
 type Mutation {
@@ -381,6 +407,76 @@ func (ec *executionContext) _Character_name(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Character_isHero(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Character",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsHero, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Character_cliqueType(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Character",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CliqueType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.CliqueType)
+	fc.Result = res
+	return ec.marshalNCliqueType2catᚑturnerᚋouterbanksᚑapiᚋgraphᚋmodelᚐCliqueType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_upsertCharacter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1752,6 +1848,22 @@ func (ec *executionContext) unmarshalInputCharacterInput(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "isHero":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isHero"))
+			it.IsHero, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cliqueType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cliqueType"))
+			it.CliqueType, err = ec.unmarshalNCliqueType2catᚑturnerᚋouterbanksᚑapiᚋgraphᚋmodelᚐCliqueType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -1784,6 +1896,16 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 			}
 		case "name":
 			out.Values[i] = ec._Character_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isHero":
+			out.Values[i] = ec._Character_isHero(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cliqueType":
+			out.Values[i] = ec._Character_cliqueType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2218,6 +2340,16 @@ func (ec *executionContext) marshalNCharacter2ᚖcatᚑturnerᚋouterbanksᚑapi
 func (ec *executionContext) unmarshalNCharacterInput2catᚑturnerᚋouterbanksᚑapiᚋgraphᚋmodelᚐCharacterInput(ctx context.Context, v interface{}) (model.CharacterInput, error) {
 	res, err := ec.unmarshalInputCharacterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCliqueType2catᚑturnerᚋouterbanksᚑapiᚋgraphᚋmodelᚐCliqueType(ctx context.Context, v interface{}) (model.CliqueType, error) {
+	var res model.CliqueType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCliqueType2catᚑturnerᚋouterbanksᚑapiᚋgraphᚋmodelᚐCliqueType(ctx context.Context, sel ast.SelectionSet, v model.CliqueType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
