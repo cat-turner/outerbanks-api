@@ -11,8 +11,3 @@ type CharacterInput struct {
 	Name string  `json:"name"`
 	ID   *string `json:"id"`
 }
-
-type SearchResult struct {
-	Characters []*Character `json:"characters"`
-	Count      int          `json:"count"`
-}
